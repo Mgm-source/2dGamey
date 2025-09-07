@@ -1,6 +1,5 @@
 #include "pch.h"
-#include "Game.h"
-#include <limits>
+#include "WinApp.h"
 #include "ImageLoader.h"
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -12,10 +11,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-    Game game;
-
-    ImageLoader::Image spriteSheet(ImageLoader::ImageType::PNG, 320, 32, 4);
-    bool worked = spriteSheet.load(R"(..\..\assets\robot.png)");
+    winApp App;
     
 	{
         // Register class
@@ -33,8 +29,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         if (!RegisterClassExW(&wcex))
             return 1;
 
-        size_t screenWidth = 0, screenHeight = 0;
-        game.ScreenSize(screenWidth, screenHeight);
+        auto screenWidth = 0u, screenHeight = 0u;
+        App.ScreenSize(screenWidth, screenHeight);
 
         RECT rc = { 0, 0, static_cast<LONG>(screenWidth), static_cast<LONG>(screenHeight) };
 
@@ -42,11 +38,10 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
         HWND hwnd = CreateWindowExW(0, g_pszClassName, g_pszAppName, WS_OVERLAPPEDWINDOW,
             CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
-            nullptr, nullptr, nullptr, &game);
+            nullptr, nullptr, nullptr, &App);
 
-        if (!game.Initalise(hwnd))
-            return 0;
-
+       if(!App.Initalise(hwnd))
+           return 0;
         ShowWindow(hwnd, nCmdShow);
 
 	}
@@ -63,7 +58,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         }
         else
         {
-            game.Tick();
+            App.Tick();
         }
     }
 
@@ -72,7 +67,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    Game* game = reinterpret_cast<Game*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+    winApp* App = reinterpret_cast<winApp*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
     switch (message)
     {
@@ -85,9 +80,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_PAINT:
-        if (game)
+        if (App)
         {
-            game->Tick(); // should just black out the screen and/or inform user what window event is causing the draw
+            App->Tick(); // should just black out the screen and/or inform user what window event is causing the draw
         }
     break;
     case WM_ENTERSIZEMOVE:
@@ -97,11 +92,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // resume game here
         break;
     case WM_SIZE:
-        if (game)
+        if (App)
         {
-            size_t width = LOWORD(lParam);
-            size_t height = HIWORD(lParam);
-            game->ScreenSize(width, height);
+            UINT width = LOWORD(lParam);
+            UINT height = HIWORD(lParam);
+            App->ScreenSize(width, height);
         }
         break;
     case WM_DESTROY:
@@ -116,33 +111,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_MOUSEMOVE:
-        if (game) 
+        if (App) 
         {
-            game->OnMouseEvent(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            App->OnMouseEvent(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         }
         break;
     case WM_LBUTTONDOWN:
-        if (game)
+        if (App)
         {
-            game->OnMouseEvent(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam),MouseEvents::LEFTDOWN);
+            App->OnMouseEvent(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam),MOUSE::MouseEvents::LEFTDOWN);
         }
         break;
     case WM_LBUTTONUP:
-        if (game)
+        if (App)
         {
-            game->OnMouseEvent(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MouseEvents::LEFTUP);
+            App->OnMouseEvent(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam),MOUSE::MouseEvents::LEFTUP);
         }
         break;
     case WM_RBUTTONDOWN:
-        if (game)
+        if (App)
         {
-            game->OnMouseEvent(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MouseEvents::RIGHTDOWN);
+            App->OnMouseEvent(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam),MOUSE::MouseEvents::RIGHTDOWN);
         }
         break;
     case WM_RBUTTONUP:
-        if (game)
+        if (App)
         {
-            game->OnMouseEvent(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), MouseEvents::RIGHTUP);
+            App->OnMouseEvent(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam),MOUSE::MouseEvents::RIGHTUP);
         }
         break;
     }
