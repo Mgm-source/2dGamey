@@ -1,36 +1,37 @@
+#include "pch.h"
 #include "AABB.h"
 
-AABB::AABB(Rect rect) : m_box{ rect }
+AABB::AABB(Rect rect) : m_box { rect }
 {
 
 }
 
-float AABB::getLength() const
+float AABB::getLength()
 {
 	return m_box.bottomRight.x - m_box.topLeft.x;
 }
 
-float AABB::getWidth() const
+float AABB::getWidth()
 {
 	return m_box.bottomRight.y - m_box.topLeft.y;
 }
 
-float AABB::top() const
+float AABB::top()
 {
 	return m_box.topLeft.y;
 }
 
-float AABB::left() const
+float AABB::left()
 {
 	return m_box.topLeft.x;
 }
 
-float AABB::right() const
+float AABB::right()
 {
 	return m_box.bottomRight.x;
 }
 
-float AABB::bottom() const
+float AABB::bottom()
 {
 	return m_box.bottomRight.y;
 }
